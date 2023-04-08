@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import Node from './Node/Node';
 import { dijkstra, getNodesInShortestPathOrder } from '../algorithms/dijkstra';
-
+import stairDemonstration from './stairDemonstation';
 import './PathfindingVisualizer.css';
 
 const START_NODE_ROW = 24;
@@ -17,7 +17,44 @@ export default class PathfindingVisualizer extends Component {
       mouseIsPressed: false,
     };
   }
-
+  stairDemonstration(board) {
+    let currentIdX = board.height - 1;
+    let currentIdY = 0;
+    let relevantStatuses = ["start", "target", "object"];
+    while (currentIdX > 0 && currentIdY < board.width) {
+      let currentId = `${currentIdX}-${currentIdY}`;
+      let currentNode = board.nodes[currentId];
+      let currentHTMLNode = document.getElementById(currentId);
+      if (!relevantStatuses.includes(currentNode.status)) {
+        currentNode.status = "wall";
+        board.wallsToAnimate.push(currentHTMLNode);
+      }
+      currentIdX--;
+      currentIdY++;
+    }
+    while (currentIdX < board.height - 2 && currentIdY < board.width) {
+      let currentId = `${currentIdX}-${currentIdY}`;
+      let currentNode = board.nodes[currentId];
+      let currentHTMLNode = document.getElementById(currentId);
+      if (!relevantStatuses.includes(currentNode.status)) {
+        currentNode.status = "wall";
+        board.wallsToAnimate.push(currentHTMLNode);
+      }
+      currentIdX++;
+      currentIdY++;
+    }
+    while (currentIdX > 0 && currentIdY < board.width - 1) {
+      let currentId = `${currentIdX}-${currentIdY}`;
+      let currentNode = board.nodes[currentId];
+      let currentHTMLNode = document.getElementById(currentId);
+      if (!relevantStatuses.includes(currentNode.status)) {
+        currentNode.status = "wall";
+        board.wallsToAnimate.push(currentHTMLNode);
+      }
+      currentIdX--;
+      currentIdY++;
+    }
+  }
   componentDidMount() {
     const grid = getInitialGrid();
     this.setState({ grid });
@@ -80,6 +117,9 @@ export default class PathfindingVisualizer extends Component {
       <>
         <button onClick={() => this.visualizeDijkstra()}>
           Visualize Dijkstra's Algorithm
+        </button >
+        <button onClick={() => this.stairDemonstartion()}>
+          Stair Demonstartion
         </button>
         <div className="grid">
           {grid.map((row, rowIdx) => {
@@ -117,6 +157,10 @@ const getInitialGrid = () => {
   for (let row = 0; row < 25; row++) {
     const currentRow = [];
     for (let col = 0; col < 70; col++) {
+      if (col % 14 == 0) {
+        currentRow.push(createWall(col, row))
+      }
+      else
       currentRow.push(createNode(col, row));
     }
     grid.push(currentRow);
@@ -133,6 +177,18 @@ const createNode = (col, row) => {
     distance: Infinity,
     isVisited: false,
     isWall: false,
+    previousNode: null,
+  };
+};
+const createWall = (col, row) => {
+  return {
+    col,
+    row,
+    isStart: row === START_NODE_ROW && col === START_NODE_COL,
+    isFinish: row === FINISH_NODE_ROW && col === FINISH_NODE_COL,
+    distance: Infinity,
+    isVisited: false,
+    isWall: true,
     previousNode: null,
   };
 };
